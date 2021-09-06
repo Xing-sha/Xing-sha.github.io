@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="1、简介 2、核心配置文件 3、MyBatisUtils 4、简单的CRUD 5、模糊查询">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mybatis学习笔记">
+<meta property="og:url" content="http://example.com/2021/09/06/Mybatis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="星">
+<meta property="og:description" content="1、简介 2、核心配置文件 3、MyBatisUtils 4、简单的CRUD 5、模糊查询">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/09/06/Mybatis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/RackMultipart20210906-4-vt0ug3_html_69c9adb8d8cda8cf.png">
+<meta property="og:image" content="http://example.com/2021/09/06/Mybatis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/RackMultipart20210906-4-vt0ug3_html_20e636e80617439.png">
+<meta property="og:image" content="http://example.com/2021/09/06/Mybatis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/RackMultipart20210906-4-vt0ug3_html_f487d67259c978c0.png">
+<meta property="og:image" content="http://example.com/2021/09/06/Mybatis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/RackMultipart20210906-4-vt0ug3_html_89f85c0932fe362.png">
+<meta property="article:published_time" content="2021-09-06T13:35:25.000Z">
+<meta property="article:modified_time" content="2021-09-06T13:55:25.129Z">
+<meta property="article:author" content="星沙">
+<meta property="article:tag" content="后端">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/09/06/Mybatis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/RackMultipart20210906-4-vt0ug3_html_69c9adb8d8cda8cf.png">
+
+<link rel="canonical" href="http://example.com/2021/09/06/Mybatis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mybatis学习笔记 | 星</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">星</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/06/Mybatis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="星沙">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="星">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mybatis学习笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-09-06 21:35:25 / 修改时间：21:55:25" itemprop="dateCreated datePublished" datetime="2021-09-06T21:35:25+08:00">2021-09-06</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a href="#Goww-1622299533168">1、简介</a></p>
+<p><a href="#uQz2-1622299447900">2、核心配置文件</a></p>
+<p><a href="#9elo-1622299753802">3、MyBatisUtils</a></p>
+<p><a href="#F5fH-1622299798625">4、简单的CRUD</a></p>
+<p><a href="#ldyF-1622343976838">5、模糊查询</a></p>
+<p><a href="#BpHY-1622374823536">6、类型别名 typeAliases</a></p>
+<p><a href="#WreI-1622375095614">7、映射器Mapper</a></p>
+<p><a href="#xpJp-1622376013562">8、结果集映射</a></p>
+<p><a href="#3Ffc-1622379333416">9、工厂日志</a></p>
+<p><a href="#iUK0-1622381838002">10、分页</a></p>
+<p><a href="#JJzy-1622384484164">11、使用注解开发</a></p>
+<p><a href="#rN6T-1622381838197">12、Lombok插件</a></p>
+<p><a href="#6o3Z-1622428207054">13、多对一</a></p>
+<p><a href="#iemB-1622445725826">14、一对多</a></p>
+<p><a href="#g51t-1622446967881">15、动态sql</a></p>
+<p><a href="#tb7I-1622597744396">16、缓存</a></p>
+<p><strong>1</strong>** 、简介**</p>
+<p><strong>1.1</strong>  <strong>什么是</strong>** Mybatis**</p>
+<p>MyBatis 是一款优秀的持久层框架;</p>
+<p>它支持自定义 SQL、存储过程以及高级映射。MyBatis 免除了几乎所有的 JDBC 代码以及设置参数和获取结果集的工作。MyBatis 可以通过简单的 XML 或注解来配置和映射原始类型、接口和 Java POJO（Plain Old Java Objects，普通老式 Java 对象）为数据库中的记录。</p>
+<p><strong>1.2</strong>  <strong>持久化</strong></p>
+<p>数据持久化</p>
+<p>持久化就是将程序的数据在持久状态和瞬时状态转化的过程</p>
+<p>内存：断电即失</p>
+<p>数据库（Jdbc）,io文件持久化。</p>
+<p>为什么要持久化？</p>
+<p>有一些对象，不能让他丢掉</p>
+<p>内存太贵</p>
+<p><strong>1.3</strong>  <strong>持久层</strong></p>
+<p>Dao层、Service层、Controller层</p>
+<p>完成持久化工作的代码块</p>
+<p>层界限十分明显</p>
+<p><strong>1.4</strong>  <strong>为什么需要</strong>** MyBatis**</p>
+<p>帮助程序员将数据存入到数据库中</p>
+<p>方便</p>
+<p>传统的JDBC代码太复杂了，简化，框架，自动化</p>
+<p>不用MyBatis也可以，技术没有高低之分</p>
+<p><strong>优点：</strong></p>
+<p>简单易学</p>
+<p>灵活</p>
+<p>sql和代码的分离，提高了可维护性。</p>
+<p>提供映射标签，支持对象与数据库的orm字段关系映射</p>
+<p>提供对象关系映射标签，支持对象关系组建维护</p>
+<p>提供xml标签，支持编写动态sql</p>
+<p><strong>2</strong>** 、核心配置文件**</p>
+<p>在pom.xml中进行MyBatis的配置</p>
+<p>&amp;lt;!– <a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/org.mybatis/mybatis">https://mvnrepository.com/artifact/org.mybatis/mybatis</a> –&amp;gt; &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;org.mybatis&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;mybatis&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;3.5.4&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt;</p>
+<p>在resource中创建mybatis核心配置文件mybatis-config.xml</p>
+<p>&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&amp;gt; &amp;lt;!DOCTYPE configuration PUBLIC &quot;-//mybatis.org//DTD Config 3.0//EN&quot; &quot;<a target="_blank" rel="noopener" href="http://mybatis.org/dtd/mybatis-3-config.dtd&quot;/">http://mybatis.org/dtd/mybatis-3-config.dtd&quot;\</a>&gt; &amp;lt;!–configuration核心配置文件–&amp;gt; &amp;lt;configuration&amp;gt; &amp;lt;environments default=&quot;development&quot;&amp;gt; &amp;lt;environment id=&quot;development&quot;&amp;gt; &amp;lt;transactionManager type=&quot;JDBC&quot;/&amp;gt; &amp;lt;dataSource type=&quot;POOLED&quot;&amp;gt; &amp;lt;property name=&quot;driver&quot; value=&quot;com.mysql.cj.jdbc.Driver&quot;/&amp;gt; &amp;lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://localhost:3306/mybatis?userSSL=true&amp;amp;useUnicode=true&amp;amp;characterEncoding=UTF-8&amp;amp;serverTimezone=UTC&quot;/&amp;gt; &amp;lt;property name=&quot;username&quot; value=&quot;root&quot;/&amp;gt; &amp;lt;property name=&quot;password&quot; value=&quot;123456&quot;/&amp;gt; &amp;lt;/dataSource&amp;gt; &amp;lt;/environment&amp;gt; &amp;lt;/environments&amp;gt; &amp;lt;mappers&amp;gt; //绑定mapper &amp;lt;/mappers&amp;gt; &amp;lt;/configuration&amp;gt;</p>
+<p>Mybatis的配置文件包含了会深深影响MyBatis行为的设置和属性信息。</p>
+<p>configuration（配置） properties（属性） settings（设置） typeAliases（类型别名） typeHandlers（类型处理器） objectFactory（对象工厂） plugins（插件） environments（环境配置） environment（环境变量） transactionManager（事务管理器） dataSource（数据源） databaseIdProvider（数据库厂商标识） mappers（映射器）</p>
+<p>环境配置 environments</p>
+<p>MyBatis 可以配置成适应多种环境</p>
+<p>不过要记住：尽管可以配置多个环境，但每个 SqlSessionFactory 实例只能选择一种环境</p>
+<p>学会使用配置多套运行环境！</p>
+<p>MyBatis默认的事务管理器就是JDBC ，连接池：POOLED</p>
+<p>属性 properties</p>
+<p>我们可以通过properties属性来实现引用配置文件</p>
+<p>这些属性可以在外部进行配置，并可以进行动态替换。你既可以在典型的 Java 属性文件中配置这些属性，也可以在 properties 元素的子元素中设置。【db.poperties】</p>
+<p>编写一个配置文件</p>
+<p>db.properties</p>
+<p>driver=com.mysql.cj.jdbc.Driver url=jdbc:mysql://localhost:3306/mybatis?userSSL=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=UTC username=root password=123456</p>
+<p>在核心配置文件中引入</p>
+<p>&amp;lt;!–引用外部配置文件–&amp;gt; &amp;lt;properties resource=&quot;db.properties&quot;&amp;gt; &amp;lt;property name=&quot;username&quot; value=&quot;${username}&quot;/&amp;gt; &amp;lt;property name=&quot;password&quot; value=&quot;${password}&quot;/&amp;gt; &amp;lt;/properties&amp;gt;</p>
+<p>可以直接引入外部文件</p>
+<p>可以在其中增加一些属性配置</p>
+<p>如果两个文件有同一个字段，优先使用外部配置文件的</p>
+<p>干净的Mapper xml 文件</p>
+<p>&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&amp;gt; &amp;lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot; &quot;<a target="_blank" rel="noopener" href="http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;/">http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;\</a>&gt; &amp;lt;!–namespace=绑定一个指定的Dao/Mapper接口–&amp;gt; &amp;lt;mapper namespace=&quot;&quot;&amp;gt; &amp;lt;/mapper&amp;gt;</p>
+<p><strong>3</strong>** 、 **<strong>MyBatisUtils</strong></p>
+<p>public class MybatisUtils { private static SqlSessionFactory sqlSessionFactory = null; static{ try { String resource = &quot;mybatis-config.xml&quot;;//配置文件 InputStream inputStream = Resources.getResourceAsStream(resource); sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);//导入配置文件 } catch (IOException e) { e.printStackTrace(); } } public static SqlSession getSqlSession(){ return sqlSessionFactory.openSession();//return SqlSession对象 } }</p>
+<p><strong>4</strong>** 、简单的 **<strong>CRUD</strong></p>
+<p>在接口interface UserMapper中</p>
+<p>//查询所有用户 List&amp;lt;User&amp;gt; getUserList(); //添加用户 void addUser(User user); //删除用户 void deleteUser(@Param(&quot;id&quot;) int id); //修改用户 void updateUser(User user);</p>
+<p>在UserMapper.xml中（xml文件命名需要和对应接口名字一样）</p>
+<p>&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&amp;gt; &amp;lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot; &quot;<a target="_blank" rel="noopener" href="http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;/">http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;\</a>&gt; &amp;lt;!–namespace=绑定一个指定的Dao/Mapper接口–&amp;gt; &amp;lt;mapper namespace=&quot;com.xingsha.dao.UserMapper&quot;&amp;gt; &amp;lt;select id=&quot;getUserList&quot; resultType=&quot;com.xingsha.pojo.User&quot;&amp;gt; select * from user &amp;lt;/select&amp;gt; &amp;lt;insert id=&quot;addUser&quot; parameterType=&quot;com.xingsha.pojo.User&quot;&amp;gt; insert into user (id,name,pwd) value (#{id},#{name},#{pwd}) &amp;lt;/insert&amp;gt; &amp;lt;delete id=&quot;deleteUser&quot; parameterType=&quot;int&quot;&amp;gt; delete from user where id=#{id} &amp;lt;/delete&amp;gt; &amp;lt;update id=&quot;updateUser&quot; parameterType=&quot;com.xingsha.pojo.User&quot;&amp;gt; update user set name=#{name},pwd=#{pwd} where id=#{id} &amp;lt;/update&amp;gt; &amp;lt;/mapper&amp;gt;</p>
+<p>万能Map</p>
+<p>使用map可以不用new一个对象。</p>
+<p>void addUser2(Map&amp;lt;String,Object&amp;gt; map);</p>
+<p>&amp;lt;insert id=&quot;addUser2&quot; parameterType=&quot;map&quot;&amp;gt; insert into user (id,name,pwd) value (#{userid},#{username},#{userpwd}) &amp;lt;/insert&amp;gt;</p>
+<p>@Test public void addUser2(){ SqlSession sqlSession = MybatisUtils.getSqlSession(); UserMapper mapper = sqlSession.getMapper(UserMapper.class); HashMap&amp;lt;String, Object&amp;gt; userMap = new HashMap&amp;lt;String, Object&amp;gt;(); userMap.put(&quot;userid&quot;,5); userMap.put(&quot;username&quot;,&quot;韶大五号&quot;); userMap.put(&quot;userpwd&quot;,&quot;123&quot;); mapper.addUser2(userMap); sqlSession.commit(); sqlSession.close(); }</p>
+<p>个人理解：</p>
+<p>执行原理应该是当运行其中一个方法时，会在 mybatis-config.xml中 &amp;lt;mappers&amp;gt; //绑定mapper &amp;lt;/mappers&amp;gt;自动查找和接口对应的xml配置文件，然后在对应xml文件中对应方法名字的（即xml中的id），执行其中的sql语句。</p>
+<p><img src="RackMultipart20210906-4-vt0ug3_html_69c9adb8d8cda8cf.png"></p>
+<p><img src="RackMultipart20210906-4-vt0ug3_html_20e636e80617439.png"></p>
+<p><strong>5</strong>** 、模糊查询**</p>
+<ol>
+<li>Java代码执行的时候，传递通配符% %</li>
+</ol>
+<p>List&amp;lt;User&amp;gt; userList = mapper.getUserLike(&quot;%李%&quot;);</p>
+<ol>
+<li>在sql拼接中使用通配符</li>
+</ol>
+<p>select * from user where name like &quot;%&quot;#{value}&quot;%&quot;</p>
+<p><strong>6</strong>** 、**</p>
+<h1 id="类型别名"><a href="#类型别名" class="headerlink" title="类型别名"></a><strong>类型别名</strong></h1><h1 id="typeAliases"><a href="#typeAliases" class="headerlink" title="typeAliases"></a><strong>typeAliases</strong></h1><ol>
+<li>类型别名可为 Java 类型设置一个缩写名字。 它仅用于 XML 配置.</li>
+<li>意在降低冗余的全限定类名书写。</li>
+</ol>
+<p>_&amp;lt;!– <strong>可以给实体类起别名</strong> –&amp;gt;_&amp;lt;typeAliases&amp;gt; &amp;lt;typeAlias type=&quot;com.kuang.pojo.User&quot; alias=&quot;User&quot;/&amp;gt; &amp;lt;/typeAliases&amp;gt;</p>
+<p>也可以指定一个包，每一个在包 domain.blog 中的 Java Bean，在没有注解的情况下，会使用 Bean 的首字母小写的非限定类名来作为它的别名。 比如 domain.blog.Author 的别名为 author,；若有注解，则别名为其注解值。见下面的例子：</p>
+<p>&amp;lt;typeAliases&amp;gt; &amp;lt;package name=&quot;com.kuang.pojo&quot;/&amp;gt; &amp;lt;/typeAliases&amp;gt;</p>
+<p>在实体类比较少的时候，使用第一种方式。如果实体类十分多，建议用第二种扫描包的方式。第一种可以DIY别名，第二种不行，如果非要改，需要在实体上增加注解。</p>
+<p>@Alias(&quot;author&quot;) public class Author { }</p>
+<p><strong>7</strong>** 、 <strong><strong>映射器</strong></strong> Mapper**</p>
+<p>接口和他的Mapper配置文件必须同名！</p>
+<p>接口和他的Mapper配置文件必须在同一包下！（其实也不用，只要同名就可以）</p>
+<p>sqlSessionFactoryBuilder ,sqlSessionFactory, sqlSession, mapper关系</p>
+<p><strong>1.sqlSessionFactoryBuilder</strong>** ：**这个类可以被实例化和丢弃，一旦创建了sqlSessionFactory，就不在需要它了。</p>
+<p><strong>2.sqlSessionFactory</strong>** ：**一旦被创建在整个程序的运行期间都存在，可以想象为一个数据库连接池，有且只能有一个，可用单例模式来实现。</p>
+<p><strong>3.sqlSession</strong>** ：**可以想象为一个数据库连接池中的一个连接，不是线程安全的，因此不能被共享，最佳作用域是放在方法被，用完之后需手动关闭，否则会占用资源。</p>
+<p><strong>4.mapper</strong>** ：**相当于一个具体的业务，执行增删改查</p>
+<p><strong>8</strong>** 、结果集映射**</p>
+<p>&amp;lt;resultMap id=&quot;userMap&quot; type=&quot;user&quot;&amp;gt; &amp;lt;result column=&quot;id&quot; property=&quot;id&quot;/&amp;gt; property为实体类中的属性，column为数据库中的属性 &amp;lt;result column=&quot;name&quot; property=&quot;name&quot;/&amp;gt; &amp;lt;result column=&quot;pwd&quot; property=&quot;pwd&quot;/&amp;gt; &amp;lt;/resultMap&amp;gt; &amp;lt;select id=&quot;getUserList2&quot; resultMap=&quot;userMap&quot;&amp;gt; select * from user where id=#{id} &amp;lt;/select&amp;gt;</p>
+<p><strong>9</strong>** 、工厂日志**</p>
+<p>STDOUT_LOGIN（标准日志输出）：在mybatis-config.xml中设置，可以直接使用</p>
+<p>&amp;lt;settings&amp;gt; &amp;lt;setting name=&quot;logImpl&quot; value=&quot;STDOUT_LOGGING&quot;/&amp;gt; &amp;lt;/settings&amp;gt;</p>
+<p>log4j</p>
+<p>&amp;lt;!– <a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/log4j/log4j">https://mvnrepository.com/artifact/log4j/log4j</a> –&amp;gt; &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;log4j&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;log4j&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;1.2.17&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt;</p>
+<p>在mybatis-config.xml设置，值为LOG4J</p>
+<p>&amp;lt;setting name=&quot;logImpl&quot; value=&quot;LOG4J&quot;/&amp;gt;</p>
+<p>在resources目录下新建log4j.properties文件</p>
+<p>#将等级为DEBUG的日志信息输出到console和file这两个目的地，console和file的定义在下面的代码 log4j.rootLogger=DEBUG,console,file #控制台输出的相关设置 log4j.appender.console = org.apache.log4j.ConsoleAppender log4j.appender.console.Target = System.out log4j.appender.console.Threshold=DEBUG log4j.appender.console.layout = org.apache.log4j.PatternLayout log4j.appender.console.layout.ConversionPattern=[%c]-%m%n #文件输出的相关设置 log4j.appender.file = org.apache.log4j.RollingFileAppender log4j.appender.file.File=./log/xingsha.log log4j.appender.file.MaxFileSize=10mb log4j.appender.file.Threshold=DEBUG log4j.appender.file.layout=org.apache.log4j.PatternLayout log4j.appender.file.layout.ConversionPattern=[%p][%d{yy-MM-dd}][%c]%m%n #日志输出级别 log4j.logger.org.mybatis=DEBUG log4j.logger.java.sql=DEBUG log4j.logger.java.sql.Statement=DEBUG log4j.logger.java.sql.ResultSet=DEBUG log4j.logger.java.sq1.PreparedStatement=DEBUG</p>
+<p>在要使用日志输出的类中，导入log4j包；获取日志对象，参数为当前类名</p>
+<p>Log4j简单使用</p>
+<p>在要使用Log4j的类中，导入包 import org.apache.log4j.Logger;</p>
+<p>日志对象，参数为当前类的class对象</p>
+<p>Logger logger = Logger.getLogger(UserDaoTest.class);</p>
+<p>日志级别</p>
+<p>logger.info(&quot;info: 测试log4j&quot;); logger.debug(&quot;debug: 测试log4j&quot;); logger.error(&quot;error:测试log4j&quot;);</p>
+<p><strong>10</strong>** 、分页**</p>
+<p>方法1：</p>
+<p><strong>sql</strong>  <strong>语句分页</strong> ：select * from tableName limit startIndex,pageSize</p>
+<p>mybatis分页：</p>
+<p><strong>1.</strong>** 接口**List getUserByLimit(Map&amp;lt;String,Integer&amp;gt; map);</p>
+<p><strong>2.Mapper.xml:</strong> select * from mybatis.user limit #{startIndex},#{pageSize}</p>
+<p>List&amp;lt;User&amp;gt; getUserByLimit(Map&amp;lt;String,Integer&amp;gt; map);</p>
+<p>&amp;lt;select id=&quot;getUserByLimit&quot; parameterType=&quot;map&quot; resultMap=&quot;userMap&quot;&amp;gt; select * from user limit #{startIndex},#{endIndex} &amp;lt;/select&amp;gt;</p>
+<p>public void getUserByLimit(){ SqlSession sqlSession = MybatisUtils.getSqlSession(); UserMapper mapper = sqlSession.getMapper(UserMapper.class); HashMap&amp;lt;String, Integer&amp;gt; map = new HashMap&amp;lt;&amp;gt;(); map.put(&quot;startIndex&quot;,2); map.put(&quot;endIndex&quot;,2); List&amp;lt;User&amp;gt; userByLimit = mapper.getUserByLimit(map); for (User user : userByLimit) { System.out.println(user); } sqlSession.close(); }</p>
+<p>方法2：使用RowBounds分页</p>
+<p><strong>接口</strong></p>
+<p>List&amp;lt;User&amp;gt; getUserByRowBounds();</p>
+<p><strong>mapper.xml</strong></p>
+<p>&amp;lt;select id=&quot;getUserByRowBounds&quot;&amp;gt; select * from user limit #{startIndex},#{pageSize} &amp;lt;/select&amp;gt;</p>
+<p><strong>测试</strong></p>
+<p>public void getUserByRowBounds(){ SqlSession sqlSession = MybatisUtils.getSqlSession(); //RowBounds实现 RowBounds rowBounds = new RowBounds(1, 2); //通过Java代码层面实现分页 List&amp;lt;User&amp;gt; userList = sqlSession.selectList(&quot;com.kaung.dao.UserMapper.getUserByRowBounds&quot;, null, rowBounds); for (User user : userList) { System.out.println(user); } sqlSession.close(); }</p>
+<p>方法3：使用分页插件</p>
+<p><strong>11</strong>** 、使用注解开发**</p>
+<p>注解适合比较简单的sql语句，复杂的业务还是要用Mapper.xml文件完成语句执行</p>
+<p>@Select(&quot;select * from user&quot;) List&amp;lt;User&amp;gt; getUsers(); @Update(&quot;update user set name=#{},password=#{} where id=#{}&quot;) int updateUser(User user); @Insert(&quot;insert into user(id,name,password) values(#{id},#{name},#{password})&quot;) int addUser(User user); @Delete(&quot;delte from user where id=#{}&quot;) int deleteUser(@Param(id)int id);</p>
+<p>然后在mybatis-config.xml中注册&amp;lt;mapper class=&quot;com.lewis.dao.UserMapper&quot;/&amp;gt;</p>
+<p><strong>12</strong>** 、 <strong><strong>Lombok</strong></strong> 插件**</p>
+<p>在实体类上加注解，可以不用写get/set,toString，有参、无参构造等方法1.在IDEA中安装插件2.导入jar包（依赖）3.在实体类上加注解缺点：对新手不友好，降低代码可阅读性，其他的项目也必须安装这个插件才能运行</p>
+<p>&amp;lt;!– <a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/org.projectlombok/lombok">https://mvnrepository.com/artifact/org.projectlombok/lombok</a> –&amp;gt; &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;org.projectlombok&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;lombok&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;1.18.20&amp;lt;/version&amp;gt; &amp;lt;scope&amp;gt;provided&amp;lt;/scope&amp;gt; &amp;lt;/dependency&amp;gt;</p>
+<p>@Getter and @Setter @FieldNameConstants @ToString @EqualsAndHashCode @AllArgsConstructor, @RequiredArgsConstructor and @NoArgsConstructor @Log, @Log4j, @Log4j2, @Slf4j, @XSlf4j, @CommonsLog, @JBossLog, @Flogger, @CustomLog @Data @Builder @SuperBuilder @Singular @Delegate @Value @Accessors @Wither @With @SneakyThrows @val</p>
+<p><strong>13</strong>** 、多对一**</p>
+<p>//学生pojo @Setter @Getter @NoArgsConstructor @AllArgsConstructor @ToString public class Student { private int id; private String name; private Teacher teacher; }</p>
+<p>//方法一：子查询，查询所有的学生信息，根据查询出来的学生的tid，寻找对应的老师信息 &amp;lt;select id=&quot;getStudent&quot; resultMap=&quot;studentTeacher&quot;&amp;gt; select * from student &amp;lt;/select&amp;gt; &amp;lt;resultMap id=&quot;studentTeacher&quot; type=&quot;student&quot;&amp;gt; &amp;lt;result column=&quot;id&quot; property=&quot;id&quot;/&amp;gt; &amp;lt;result column=&quot;name&quot; property=&quot;name&quot;/&amp;gt; &amp;lt;association property=&quot;teacher&quot; column=&quot;tid&quot; javaType=&quot;teacher&quot; select=&quot;getTeacher&quot; /&amp;gt; &amp;lt;/resultMap&amp;gt; &amp;lt;select id=&quot;getTeacher&quot; resultType=&quot;teacher&quot;&amp;gt; select * from teacher where id=#{tid}; &amp;lt;/select&amp;gt; //方法二：按照结果嵌套，推荐使用 &amp;lt;select id=&quot;getStudent2&quot; resultMap=&quot;studentTeacher2&quot;&amp;gt; select s.id sid,s.name sname,t.name tname from student s,teacher t where s.tid=t.id &amp;lt;/select&amp;gt; &amp;lt;resultMap id=&quot;studentTeacher2&quot; type=&quot;student&quot;&amp;gt; &amp;lt;result column=&quot;sid&quot; property=&quot;id&quot;/&amp;gt; &amp;lt;result column=&quot;sname&quot; property=&quot;name&quot;/&amp;gt; &amp;lt;association property=&quot;teacher&quot; javaType=&quot;teacher&quot;&amp;gt; &amp;lt;result property=&quot;name&quot; column=&quot;tname&quot;/&amp;gt; &amp;lt;/association&amp;gt; &amp;lt;/resultMap&amp;gt;</p>
+<p><strong>14</strong>** 、一对多**</p>
+<p><strong>//</strong>** 老师 **<strong>pojo</strong> @Setter @Getter @NoArgsConstructor @AllArgsConstructor @ToString public class Teacher { private int id; private String name; private List&amp;lt;Student&amp;gt; students; }</p>
+<p>&amp;lt;mapper namespace=&quot;com.xingsha.dao.TeacherMapper&quot;&amp;gt; &amp;lt;select id=&quot;getTeacher&quot; resultMap=&quot;StudentTeacher&quot;&amp;gt; select s.id sid,s.name sname,t.name tname,t.id tid from student s,teacher t where s.tid=t.id and t.id=#{tid} &amp;lt;/select&amp;gt; &amp;lt;resultMap id=&quot;StudentTeacher&quot; type=&quot;teacher&quot;&amp;gt; &amp;lt;result column=&quot;tid&quot; property=&quot;id&quot;/&amp;gt; &amp;lt;result column=&quot;tname&quot; property=&quot;name&quot;/&amp;gt; &amp;lt;collection property=&quot;students&quot; ofType=&quot;student&quot;&amp;gt; &amp;lt;result column=&quot;sid&quot; property=&quot;id&quot;/&amp;gt; &amp;lt;result column=&quot;sname&quot; property=&quot;name&quot;/&amp;gt; &amp;lt;/collection&amp;gt; &amp;lt;/resultMap&amp;gt; &amp;lt;/mapper&amp;gt;</p>
+<ol>
+<li>如果返回结果为一个对象，用association;如果返回结果为一个集合，用collection</li>
+<li>集合中的泛型信息，使用ofType获取</li>
+</ol>
+<p><strong>15</strong>** 、动态 **<strong>sql</strong></p>
+<p>&amp;lt;if&amp;gt;标签和&amp;lt;where&amp;gt;</p>
+<p>&amp;lt;select id=&quot;queryBolgIF&quot; parameterType=&quot;map&quot; resultType=&quot;blog&quot;&amp;gt; select * from blog &amp;lt;where&amp;gt; &amp;lt;if test=&quot;title!=null&quot;&amp;gt; title = #{title} &amp;lt;/if&amp;gt; &amp;lt;if test=&quot;author!=null&quot;&amp;gt; and author = #{author} &amp;lt;/if&amp;gt; &amp;lt;/where&amp;gt; &amp;lt;/select&amp;gt;</p>
+<p>顾名思义，就是if判断语句判断是否符合条件</p>
+<p>&amp;lt;where&amp;gt;则是自动添加where语句不用自己手动去写，当只有一个判断情况的话就会自动去除and</p>
+<p>&amp;lt;choose&amp;gt;</p>
+<p>&amp;lt;select id=&quot;queryBolgIF2&quot; parameterType=&quot;map&quot; resultType=&quot;blog&quot;&amp;gt; select * from blog &amp;lt;where&amp;gt; &amp;lt;choose&amp;gt; &amp;lt;when test=&quot;title!=null&quot;&amp;gt; title = #{title} &amp;lt;/when&amp;gt; &amp;lt;when test=&quot;author!=null&quot;&amp;gt; and author = #{author} &amp;lt;/when&amp;gt; &amp;lt;otherwise&amp;gt; and views = #{views} &amp;lt;/otherwise&amp;gt; &amp;lt;/choose&amp;gt; &amp;lt;/where&amp;gt; &amp;lt;/select&amp;gt;</p>
+<p>就是case语句，只要满足一个条件即可跳出判断。</p>
+<p>&amp;lt;update&amp;gt;中的&amp;lt;set&amp;gt;</p>
+<p>&amp;lt;update id=&quot;updateBlog&quot; parameterType=&quot;blog&quot;&amp;gt; update blog &amp;lt;set&amp;gt; &amp;lt;if test=&quot;title!=null&quot;&amp;gt; title = #{title}, &amp;lt;/if&amp;gt; &amp;lt;if test=&quot;author!=null&quot;&amp;gt; author = #{author}, &amp;lt;/if&amp;gt; &amp;lt;/set&amp;gt; where id = #{id} &amp;lt;/update&amp;gt;</p>
+<p>当只有一个或者最后一个条件，自动去除后面的 <strong>，</strong></p>
+<p>&amp;lt;include&amp;gt;和&amp;lt;sql&amp;gt;</p>
+<p>&amp;lt;update id=&quot;updateBlog&quot; parameterType=&quot;blog&quot;&amp;gt; &amp;lt;include refid=&quot;update&quot;&amp;gt;&amp;lt;/include&amp;gt; &amp;lt;/update&amp;gt; &amp;lt;sql id=&quot;update&quot;&amp;gt; update blog &amp;lt;set&amp;gt; &amp;lt;if test=&quot;title!=null&quot;&amp;gt; title = #{title}, &amp;lt;/if&amp;gt; &amp;lt;if test=&quot;author!=null&quot;&amp;gt; author = #{author}, &amp;lt;/if&amp;gt; &amp;lt;/set&amp;gt; where id = #{id} &amp;lt;/sql&amp;gt;</p>
+<p>使用SQL标签抽取公共部分，使用include进行引用。</p>
+<p>注意事项：</p>
+<ol>
+<li>最好基于单标来定义SQL片段</li>
+<li>不要存在where标签</li>
+</ol>
+<p><strong>16</strong>** 、缓存**</p>
+<p>查询 ： 连接数据库，耗资源</p>
+<p>​ 一次查询的结果，给他暂存一个可以直接取到的地方 –&amp;gt; 内存：缓存</p>
+<p>我们再次查询的相同数据的时候，直接走缓存，不走数据库了</p>
+<p><strong>1.</strong>** 什么是缓存****[Cache]**<strong>？</strong></p>
+<p>存在内存中的临时数据</p>
+<p>将用户经常查询的数据放在缓存（内存）中，用户去查询数据就不用从磁盘上（关系型数据库文件）查询，从缓存中查询，从而提高查询效率，解决了高并发系统的性能问题</p>
+<p><strong>为什么使用缓存？</strong></p>
+<p>减少和数据库的交互次数，减少系统开销，提高系统效率</p>
+<p>什么样的数据可以使用缓存？</p>
+<p>经常查询并且不经常改变的数据 【可以使用缓存】</p>
+<p><strong>MyBatis</strong>** 缓存**</p>
+<p>MyBatis包含一个非常强大的查询缓存特性，它可以非常方便的定制和配置缓存，缓存可以极大的提高查询效率。</p>
+<p>MyBatis系统中默认定义了两级缓存：一级缓存和二级缓存</p>
+<p>默认情况下，只有一级缓存开启（SqlSession级别的缓存，也称为本地缓存）</p>
+<p>二级缓存需要手动开启和配置，他是基于namespace级别的缓存。</p>
+<p>为了提高可扩展性，MyBatis定义了缓存接口Cache。我们可以通过实现Cache接口来定义二级缓存。</p>
+<p><strong>一级缓存</strong></p>
+<p>一级缓存也叫本地缓存：SqlSession</p>
+<p>与数据库同一次会话期间查询到的数据会放在本地缓存中</p>
+<p>以后如果需要获取相同的数据，直接从缓存中拿，没必要再去查询数据库</p>
+<p>只存在SqlSession之间，当sqlsession关闭时就消失。</p>
+<p>测试：</p>
+<p><img src="RackMultipart20210906-4-vt0ug3_html_f487d67259c978c0.png"></p>
+<p><strong>缓存失效的情况：</strong></p>
+<ol>
+<li>查询不同的东西</li>
+<li>增删改操作，可能会改变原来的数据，所以必定会刷新缓存</li>
+<li>查询不同的Mapper.xml</li>
+<li>手动清理缓存</li>
+</ol>
+<p>sqlSession.clearCache();</p>
+<p><strong>二级缓存</strong></p>
+<p>二级缓存也叫全局缓存，一级缓存作用域太低了，所以诞生了二级缓存</p>
+<p>基于namespace级别的缓存，一个名称空间，对应一个二级缓存</p>
+<p>工作机制:</p>
+<p>一个会话查询一条数据，这个数据就会被放在当前会话的一级缓存中。</p>
+<p>如果会话关闭了，这个会员对应的一级缓存就没了；但是我们想要的是，会话关闭了，一级缓存中的数据被保存到二级缓存中</p>
+<p>新的会话查询信息，就可以从二级缓存中获取内容</p>
+<p>不同的mapper查询出的数据会放在自己对应的缓存（map）中</p>
+<p>一级缓存开启（SqlSession级别的缓存，也称为本地缓存）</p>
+<p>二级缓存需要手动开启和配置，他是基于namespace级别的缓存。</p>
+<p>为了提高可扩展性，MyBatis定义了缓存接口Cache。我们可以通过实现Cache接口来定义二级缓存。</p>
+<p><strong>步骤：</strong></p>
+<p>1：开启全局缓存</p>
+<p>&amp;lt;!–显示的开启全局缓存–&amp;gt; &amp;lt;setting name=&quot;cacheEnabled&quot; value=&quot;true&quot;/&amp;gt;</p>
+<p>2.在Mapper.xml中使用缓存</p>
+<p>&amp;lt;!–在当前Mapper.xml中使用二级缓存–&amp;gt; &amp;lt;cache eviction=&quot;FIFO&quot; flushInterval=&quot;60000&quot; size=&quot;512&quot; readOnly=&quot;true&quot;/&amp;gt;</p>
+<p><strong>注意：</strong> 如果没有策略则需要将实体类序列化。</p>
+<p><img src="RackMultipart20210906-4-vt0ug3_html_89f85c0932fe362.png"></p>
+<p><strong>小结：</strong></p>
+<ol>
+<li>只要开启了二级缓存，在同一个Mapper下就有效</li>
+<li>所有的数据都会放在一级缓存中</li>
+<li>只有当前会话提交，或者关闭的时候，才会提交到二级缓存中</li>
+</ol>
+<p><strong>自定义缓存</strong>** -ehcache**</p>
+<p>Ehcache是一种广泛使用的开源Java分布式缓存。主要面向通用缓存</p>
+<p>1.导包</p>
+<p>&amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;org.mybatis.caches&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;mybatis-ehcache&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;1.2.1&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt;</p>
+<p>2.在mapper中指定使用我们的ehcache缓存实现</p>
+<p>&amp;lt;cache type=&quot;org.mybatis.caches.ehcache.EhcacheCache&quot;/&amp;gt;</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%90%8E%E7%AB%AF/" rel="tag"># 后端</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2021/09/06/SpringMVC%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="next" title="SpringMVC学习笔记">
+      SpringMVC学习笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E5%88%AB%E5%90%8D"><span class="nav-number">1.</span> <span class="nav-text">类型别名</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#typeAliases"><span class="nav-number">2.</span> <span class="nav-text">typeAliases</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="星沙"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">星沙</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">星沙</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
